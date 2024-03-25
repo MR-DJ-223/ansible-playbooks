@@ -1,0 +1,33 @@
+---
+- name: Move Certificate from Venafi to Vault Namespace
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Include Venafi and Vault credentials
+      include_vars:
+        file: credentials.yml
+
+    - name: Read certificate from Venafi
+      community.general.venafi_certificate_read:
+        url: "{{ venafi.url }}"
+        user: "{{ venafi.user }}"
+        password: "{{ venafi.password }}"
+        zone: "{{ venafi.zone }}"
+        common_name: "{{ certificate_common_name }}"
+      register: venafi_cert
+
+    - name: Save certificate to Vault namespace
+      community.hashi_vault.vault_write:
+        url: "{{ vault.url }}"
+        token: "{{ vault.token }}"
+        path: "{{ vault_namespace_path }}/certificate"
+        data:
+          certificate: "{{ venafi_cert.certificate }}"
+          private_key: "{{ venafi_cert.private_key }}"
+          chain: "{{ venafi_cert.chain }}"
+      when: venafi_cert.success
+
+    - name: Display result
+      debug:
+        msg: "Certificate moved to Vault namespace successfully"
+      when: venafi_cert.success
