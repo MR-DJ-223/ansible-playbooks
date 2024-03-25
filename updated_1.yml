@@ -1,0 +1,14 @@
+---
+venafi:
+  user: 'admin'
+  password: 'secret'
+  url: 'https://venafi.example.com/vedsdk'
+  zone: "devops\\vcert"
+
+vault:
+  url: 'https://vault.example.com:8200'
+  token: 'your_vault_token'
+
+certificate_common_name: "example.com"
+
+vault_namespace_path: "secret/data"
